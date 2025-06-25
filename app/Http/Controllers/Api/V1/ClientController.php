@@ -16,10 +16,11 @@ class ClientController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        // Показываем всех клиентов, принадлежащих текущему аутентифицированному пользователю
-        return auth()->user()->clients;
-    }
+{
+    // Мы говорим: "Дай мне всех клиентов, и СРАЗУ ЖЕ подгрузи для каждого из них все его проекты".
+    // Это одна из самых важных техник оптимизации в Laravel.
+    return auth()->user()->clients()->with('projects')->get();
+}
 
     /**
      * Store a newly created resource in storage.
