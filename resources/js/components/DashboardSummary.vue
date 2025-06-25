@@ -1,37 +1,37 @@
 <template>
     <div v-if="!loading" class="row mb-4">
         <div class="col-md-3">
-            <div class="card text-center">
+            <div class="card text-center h-100">
                 <div class="card-body">
                     <h5 class="card-title text-muted">К оплате</h5>
-                    <p class="card-text fs-4">{{ formatCurrency(summary.totalUnpaid) }}</p>
+                    <p class="card-text fs-4">{{ formatCurrency(summaryData.totalUnpaid) }}</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center">
+            <div class="card text-center h-100">
                 <div class="card-body">
                     <h5 class="card-title text-muted">Доход (мес.)</h5>
-                    <p class="card-text fs-4">{{ formatCurrency(summary.incomeThisMonth) }}</p>
+                    <p class="card-text fs-4">{{ formatCurrency(summaryData.incomeThisMonth) }}</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center">
+            <div class="card text-center h-100">
                 <div class="card-body">
                     <h5 class="card-title text-muted">Неоплаченные часы</h5>
-                    <p class="card-text fs-4">{{ summary.unbilledHours }} ч.</p>
+                    <p class="card-text fs-4">{{ summaryData.unbilledHours }} ч.</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center" :class="{ 'bg-primary text-white': summary.activeTimer }">
+            <div class="card text-center h-100" :class="{ 'bg-primary text-white': summaryData.activeTimer }">
                 <div class="card-body">
-                     <h5 class="card-title" :class="{'text-white-50': summary.activeTimer}">Активный таймер</h5>
-                    <div v-if="summary.activeTimer" class="fs-5">
-                       <a :href="`/invoices`" class="text-white stretched-link text-decoration-none">
-                           {{ summary.activeTimer.project.title }}
-                       </a>
+                     <h5 class="card-title" :class="{'text-white-50': summaryData.activeTimer}">Активный таймер</h5>
+                    <div v-if="summaryData.activeTimer" class="fs-5">
+                       <span class="text-white stretched-link text-decoration-none">
+                           {{ summaryData.activeTimer.project.title }}
+                       </span>
                     </div>
                      <p v-else class="card-text fs-4 text-muted">Выключен</p>
                 </div>
@@ -46,34 +46,19 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
-import axios from 'axios';
-
-const loading = ref(true);
-const summary = reactive({
-    totalUnpaid: 0,
-    incomeThisMonth: 0,
-    unbilledHours: 0,
-    activeTimer: null,
-});
-
-const fetchSummary = async () => {
-    loading.value = true;
-    try {
-        const response = await axios.get('/api/dashboard-summary');
-        Object.assign(summary, response.data);
-    } catch (error) {
-        console.error("Не удалось загрузить сводку:", error);
-    } finally {
-        loading.value = false;
+// Этот компонент теперь "тупой". Он просто принимает данные и отображает их.
+const props = defineProps({
+    summaryData: {
+        type: Object,
+        required: true,
+    },
+    loading: {
+        type: Boolean,
+        required: true,
     }
-};
+});
 
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', minimumFractionDigits: 0 }).format(amount);
 };
-
-onMounted(() => {
-    fetchSummary();
-});
 </script>
