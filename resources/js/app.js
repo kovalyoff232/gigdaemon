@@ -21,6 +21,16 @@ app.component('example-component', ExampleComponent);
 
 import DashboardComponent from './components/DashboardComponent.vue';
 app.component('dashboard-component', DashboardComponent);
+
+import InvoicesComponent from './components/InvoicesComponent.vue';
+app.component('invoices-component', InvoicesComponent);
+
+import InvoiceDetailComponent from './components/InvoiceDetailComponent.vue';
+app.component('invoice-detail-component', InvoiceDetailComponent);
+
+import DashboardSummary from './components/DashboardSummary.vue';
+app.component('dashboard-summary', DashboardSummary);
+
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue

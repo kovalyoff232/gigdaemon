@@ -9,6 +9,7 @@ use App\Models\Project;
 use App\Models\TimeEntry;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Http\Requests\Api\V1\StoreManualTimeEntryRequest;
 
 class TimeEntryController extends Controller
 {
@@ -24,9 +25,8 @@ class TimeEntryController extends Controller
     // Запустить новый таймер
     public function start(StoreTimeEntryRequest $request, Project $project)
     {
-        $this->authorize('view', $project); // Пользователь должен видеть проект, чтобы начать работу
+        $this->authorize('view', $project);
 
-        // Убедимся, что нет других активных таймеров у этого пользователя
         $existing = TimeEntry::where('user_id', auth()->id())->whereNull('end_time')->first();
         if ($existing) {
             return response()->json(['message' => 'У вас уже есть активный таймер.'], Response::HTTP_CONFLICT);
@@ -34,12 +34,34 @@ class TimeEntryController extends Controller
 
         $timeEntry = $project->timeEntries()->create([
             'user_id' => auth()->id(),
+            // === ИЗМЕНЕНИЕ ЗДЕСЬ ===
+            // Мы явно добавляем ID клиента при создании записи времени.
+            'client_id' => $project->client_id, 
             'start_time' => now(),
             'description' => $request->validated('description'),
         ]);
 
         return response()->json($timeEntry, Response::HTTP_CREATED);
     }
+	
+	
+	public function storeManual(StoreManualTimeEntryRequest $request, \App\Models\Project $project)
+{
+    $this->authorize('view', $project);
+
+    $validated = $request->validated();
+    
+    $entry = $project->timeEntries()->create([
+        'user_id' => auth()->id(),
+        'client_id' => $project->client_id,
+        'description' => $validated['description'],
+        'start_time' => $validated['start_time'],
+        'end_time' => $validated['end_time'],
+    ]);
+
+    return response()->json($entry, \Illuminate\Http\Response::HTTP_CREATED);
+}
+	
 
     // Остановить активный таймер
     public function stop(TimeEntry $timeEntry)
@@ -52,9 +74,9 @@ class TimeEntryController extends Controller
 
         $timeEntry->update(['end_time' => now()]);
 
-        // ИЗМЕНЕНИЕ: Мы возвращаем "свежую" версию модели из базы,
-        // чтобы гарантировать, что accessor 'duration' будет посчитан.
-        return response()->json($timeEntry->fresh());
+        // ИЗМЕНЕНИЕ: Мы принудительно обновляем модель из базы данных
+        // и возвращаем ее. Теперь в ней гарантированно есть все, включая 'duration'.
+        return response()->json($timeEntry->refresh());
     }
 
     // Обновить существующую запись

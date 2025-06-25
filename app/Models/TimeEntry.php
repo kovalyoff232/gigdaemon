@@ -12,6 +12,7 @@ class TimeEntry extends Model
 
     protected $fillable = [
         'project_id',
+        'client_id',
         'user_id',
         'start_time',
         'end_time',
@@ -35,12 +36,26 @@ class TimeEntry extends Model
     {
         return $this->belongsTo(User::class);
     }
+	
+	public function invoiceItem()
+	{
+		// У одной записи времени может быть только одна позиция в счете.
+		return $this->hasOne(InvoiceItem::class);
+	}
     
     // Аксессор для вычисления продолжительности в секундах
     protected function duration(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->end_time ? $this->end_time->diffInSeconds($this->start_time) : null,
+            get: function () {
+                if (!$this->end_time) {
+                    return 0; // или null, если предпочитаешь
+                }
+                
+                // ЗАМЕНЯЕМ НЕПОНЯТНЫЙ diffInSeconds НА ПРЯМОЕ ВЫЧИТАНИЕ ВРЕМЕННЫХ МЕТОК.
+                // ЭТО НЕ МОЖЕТ ДАТЬ СБОЙ.
+                return $this->end_time->timestamp - $this->start_time->timestamp;
+            },
         );
     }
 }

@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\ProjectController;
-use App\Http\Controllers\Api\V1\TimeEntryController; // <-- ВОТ ОН, НЕДОСТАЮЩИЙ КЛЮЧ!
+use App\Http\Controllers\Api\V1\TimeEntryController;
+use App\Http\Controllers\Api\V1\InvoiceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,32 +21,28 @@ use Illuminate\Support\Facades\Route;
 
 // Защищенные маршруты, доступные только после входа в систему
 Route::middleware('auth:sanctum')->group(function () {
-    // Этот маршрут вернет данные текущего залогиненного пользователя
+    // Пользователь
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
 
-    // CRUD маршруты для клиентов и проектов
+    // CRUD маршруты
     Route::apiResource('clients', ClientController::class);
     Route::apiResource('projects', ProjectController::class);
+    Route::apiResource('invoices', InvoiceController::class);
     
     // --- Маршруты для управления ВРЕМЕНЕМ ---
-
-    // Получить все записи времени для конкретного проекта
     Route::get('/projects/{project}/time-entries', [TimeEntryController::class, 'index']);
-
-    // Запустить новый таймер для проекта
     Route::post('/projects/{project}/time-entries/start', [TimeEntryController::class, 'start']);
-
-    // Остановить активный таймер
     Route::patch('/time-entries/{time_entry}/stop', [TimeEntryController::class, 'stop']);
-
-    // Обновить существующую запись времени (например, изменить описание)
     Route::put('/time-entries/{time_entry}', [TimeEntryController::class, 'update']);
-
-    // Удалить запись времени
     Route::delete('/time-entries/{time_entry}', [TimeEntryController::class, 'destroy']);
-    
-    // Получить текущий активный таймер пользователя
     Route::get('/time-entries/active', [TimeEntryController::class, 'getActive']);
+	Route::get('/invoices', [InvoiceController::class, 'index']);
+	Route::post('/invoices', [InvoiceController::class, 'store']);
+	Route::get('/clients/{client}/unbilled-entries', [InvoiceController::class, 'getUnbilledEntries']);
+	Route::get('/invoices/{invoice}', [InvoiceController::class, 'show']);
+	Route::get('/dashboard-summary', [DashboardController::class, 'summary']);
+	Route::patch('/invoices/{invoice}/status', [\App\Http\Controllers\Api\V1\InvoiceController::class, 'updateStatus']);
+	Route::post('/projects/{project}/time-entries/manual', [\App\Http\Controllers\Api\V1\TimeEntryController::class, 'storeManual']);
 });

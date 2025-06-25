@@ -12,11 +12,12 @@ class UpdateClientRequest extends FormRequest
     }
 
     public function rules(): array
-    {
-        return [
-            'name' => 'sometimes|required|string|max:255',
-            'email' => 'sometimes|nullable|email|max:255',
-            'phone' => 'sometimes|nullable|string|max:20',
-        ];
-    }
+{
+    return [
+        'name' => 'sometimes|required|string|max:255',
+        'email' => 'sometimes|nullable|email|max:255',
+        'phone' => 'sometimes|nullable|string|max:20',
+        'default_rate' => 'sometimes|nullable|numeric|min:0',
+    ];
+}
 }

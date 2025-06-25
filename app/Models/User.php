@@ -46,15 +46,26 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-	
-public function clients()
-{
-    return $this->hasMany(Client::class);
-}
+    
+    // Связь с клиентами (уже была)
+    public function clients()
+    {
+        return $this->hasMany(Client::class);
+    }
 
-public function projects()
-{
-    return $this->hasMany(Project::class);
-}
+    // Связь с проектами (уже была)
+    public function projects()
+    {
+        return $this->hasMany(Project::class);
+    }
+    
+    // === НЕДОСТАЮЩАЯ СВЯЗЬ, КОТОРАЯ ВСЕ ЛОМАЛА ===
+    // Пользователь имеет много записей времени.
+    public function timeEntries()
+    {
+        return $this->hasMany(TimeEntry::class);
+    }
 	
+	public function invoices() { return $this->hasMany(Invoice::class); }
+    // === КОНЕЦ ИСПРАВЛЕНИЯ ===
 }

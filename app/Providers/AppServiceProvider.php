@@ -10,6 +10,8 @@ use App\Policies\ProjectPolicy;
 use App\Policies\TimeEntryPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use App\Models\Invoice;
+use App\Policies\InvoicePolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,5 +33,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Client::class, ClientPolicy::class);
         Gate::policy(Project::class, ProjectPolicy::class);
         Gate::policy(TimeEntry::class, TimeEntryPolicy::class);
+		Gate::policy(Invoice::class, InvoicePolicy::class);
     }
 }
