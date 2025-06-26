@@ -1,4 +1,4 @@
-# --- STAGE 1: PHP Dependencies (Composer) ---
+# --- ЭТАП 1: Установка зависимостей PHP ---
 FROM composer:2.7 as vendor
 WORKDIR /app
 COPY database/ database/
@@ -6,7 +6,7 @@ COPY composer.json composer.json
 COPY composer.lock composer.lock
 RUN composer install --no-interaction --no-scripts --no-dev --optimize-autoloader
 
-# --- STAGE 2: Frontend Assets (NPM) ---
+# --- ЭТАП 2: Сборка фронтенда ---
 FROM node:20-alpine as frontend
 WORKDIR /app
 COPY package.json package.json
@@ -15,46 +15,39 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# --- STAGE 3: Final Production Image ---
+# --- ЭТАП 3: Собираем финальный образ ---
 FROM php:8.2-fpm-alpine
 WORKDIR /var/www/html
 
-# Install system dependencies: PHP extensions and Nginx
-RUN apk add --no-cache \
-      bash \
-      nginx \
-      libzip-dev \
-      zip \
-      postgresql-dev \
-    && docker-php-ext-install \
-      pdo \
-      pdo_pgsql \
-      zip
+# Устанавливаем системные пакеты
+RUN apk add --no-cache bash nginx libzip-dev zip postgresql-dev \
+    && docker-php-ext-install pdo pdo_pgsql zip
 
-# Copy Composer binary
+# === ИЗМЕНЕНИЕ ЗДЕСЬ: КОПИРУЕМ КОНФИГУРАЦИЮ PHP-FPM ===
+COPY docker/www.conf /usr/local/etc/php-fpm.d/www.conf
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+
+# Копируем Composer
 COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
-# Copy application code
+# Копируем весь код приложения
 COPY . .
 
-# Copy pre-built dependencies
+# Копируем собранные артефакты
 COPY --from=vendor /app/vendor/ /var/www/html/vendor/
 COPY --from=frontend /app/public/build/ /var/www/html/public/build/
 
-# Generate optimized autoloader
+# Запускаем скрипты Composer
 RUN composer dump-autoload --optimize
 
-# --- FIX: CREATE THE DIRECTORY BEFORE SETTING PERMISSIONS ---
-# Create the run directory for PHP-FPM socket
-RUN mkdir -p /var/run/php
+# Создаем директорию для сокета и настраиваем права доступа
+RUN mkdir -p /var/run/php \
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/run/php \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Set correct permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/run/php
-RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
-
-# Copy start script and make it executable
+# Копируем и делаем исполняемым наш скрипт запуска
 COPY start.sh .
 RUN chmod +x ./start.sh
 
-# Entrypoint
+# Команда для запуска контейнера
 CMD ["./start.sh"]
