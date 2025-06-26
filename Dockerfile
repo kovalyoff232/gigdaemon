@@ -10,7 +10,6 @@ RUN composer install --no-interaction --no-dev --optimize-autoloader
 FROM node:18 as frontend
 WORKDIR /app
 COPY package.json package.json
-# Копируем package-lock.json только если он существует
 COPY package-lock.json* package-lock.json
 RUN npm install
 COPY . .
@@ -28,5 +27,14 @@ COPY --from=vendor /app/database/ /var/www/html/database/
 COPY --from=frontend /app/public/build/ /var/www/html/public/build/
 COPY . .
 
+# === ИЗМЕНЕНИЯ ЗДЕСЬ ===
+# Копируем наш новый скрипт запуска
+COPY start.sh .
+# Делаем его исполняемым
+RUN chmod +x ./start.sh
+
 # Отдаем права на файлы веб-серверу
 RUN chown -R www-data:www-data /var/www/html
+
+# Указываем, что при запуске контейнера нужно выполнить наш скрипт
+CMD ["./start.sh"]
