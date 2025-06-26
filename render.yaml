@@ -3,7 +3,7 @@ databases:
   - name: gigdaemon-db
     region: frankfurt
     plan: free # free plan is available for databases
-    postgresMajorVersion: 15
+    postgresMajorVersion: 16
 
 # services: A list of non-PostgreSQL services.
 services:
