@@ -1,8 +1,5 @@
 name: Run Laravel Tests
 
-# Этот ритуал будет запускаться в двух случаях:
-# 1. Когда ты делаешь `push` в ветку `main`.
-# 2. Когда кто-то (или ты) создает Pull Request в ветку `main`.
 on:
   push:
     branches: [ "master" ]
@@ -11,50 +8,44 @@ on:
 
 jobs:
   laravel-tests:
-    # Указываем, что ритуал будет проходить на свежей виртуальной машине с Ubuntu.
     runs-on: ubuntu-latest
-
-    # Это шаги, которые будет выполнять наш страж.
     steps:
       # --- ШАГ 1: Подготовка окружения ---
-
-      # Скачиваем твой код из репозитория на виртуальную машину.
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Устанавливаем PHP нужной версии и с нужными расширениями.
-      # Мы берем их прямо из твоего Dockerfile, чтобы окружение было максимально похожим.
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: pdo, pdo_pgsql, zip # Расширения для Laravel и PostgreSQL
+          extensions: pdo, pdo_pgsql, zip
           
-      # --- ШАГ 2: Установка зависимостей ---
-      
-      # Копируем .env.example в .env, чтобы у Artisan были все нужные ключи.
-      # В тестах нам не нужны настоящие секреты, поэтому этого достаточно.
+      # --- ШАГ 2: Установка зависимостей PHP ---
       - name: Copy .env file
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
-
-      # Устанавливаем все зависимости PHP через Composer.
-      # --no-interaction, --no-progress, --no-suggest - чтобы в логах не было мусора.
+        
       - name: Install Composer Dependencies
         run: composer install --no-interaction --no-progress --no-suggest
 
+      # --- ШАГ 2.5: СБОРКА ФРОНТЕНДА (ВОТ ОНО!) ---
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Как в твоем Dockerfile
+
+      - name: Install NPM Dependencies
+        run: npm install
+
+      - name: Build assets
+        run: npm run build
+
       # --- ШАГ 3: Запуск тестов ---
-      
-      # Генерируем ключ приложения. Без него Laravel не запустится.
       - name: Generate an application key
         run: php artisan key:generate
 
-      # Устанавливаем права на папки, как в Docker. Это хорошая практика.
       - name: Set directory permissions
         run: chmod -R 777 storage bootstrap/cache
 
-      # И, наконец, главный момент... Запускаем тесты!
-      # Мы явно указываем, что база данных будет в памяти (sqlite, :memory:),
-      # чтобы не настраивать настоящий PostgreSQL. Это супер-быстро и идеально для CI.
       - name: Execute tests (via PHPUnit)
         env:
           DB_CONNECTION: sqlite
