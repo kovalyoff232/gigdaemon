@@ -6,6 +6,8 @@
 
 import './bootstrap';
 import { createApp } from 'vue';
+import Toast from 'vue-toastification';
+import 'vue-toastification/dist/index.css';
 
 /**
  * Next, we will create a fresh Vue application instance. You may then begin
@@ -15,6 +17,22 @@ import { createApp } from 'vue';
 
 const app = createApp({});
 
+const options = {
+    position: "top-right",
+    timeout: 4000,
+    closeOnClick: true,
+    pauseOnFocusLoss: true,
+    pauseOnHover: true,
+    draggable: true,
+    draggablePercent: 0.6,
+    showCloseButtonOnHover: false,
+    hideProgressBar: false,
+    closeButton: "button",
+    icon: true,
+    rtl: false,
+    transition: "Vue-Toastification__bounce",
+};
+app.use(Toast, options);
 
 import DashboardComponent from './components/DashboardComponent.vue';
 app.component('dashboard-component', DashboardComponent);
