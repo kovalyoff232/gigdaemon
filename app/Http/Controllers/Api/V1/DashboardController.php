@@ -5,29 +5,50 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\TimeEntry;
+use App\Services\CurrencyService; // Наше оружие здесь тоже нужно
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache; // Импортируем магию кэша
+use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
+    protected CurrencyService $currencyService;
+
+    public function __construct(CurrencyService $currencyService)
+    {
+        $this->currencyService = $currencyService;
+    }
+
     public function summary(Request $request)
     {
         $user = $request->user();
-        $cacheKey = "user:{$user->id}:dashboard-summary"; // Уникальный ключ для кэша этого пользователя
+        $baseCurrency = 'RUB'; // Наша основная валюта
+        $cacheKey = "user:{$user->id}:dashboard-summary-v2"; // Новая версия ключа из-за новой логики
 
-        // Пытаемся взять данные из кэша. Если их нет, выполняем функцию и сохраняем результат на 10 минут.
-        $summaryData = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($user) {
+        $summaryData = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($user, $baseCurrency) {
             
-            $totalUnpaid = Invoice::where('user_id', $user->id)
+            // 1. Считаем НЕОПЛАЧЕННУЮ сумму, конвертируя каждую в RUB
+            $unpaidInvoices = Invoice::where('user_id', $user->id)
                 ->whereIn('status', ['sent', 'overdue', 'draft'])
-                ->sum('total_amount');
-            
-            $incomeThisMonth = Invoice::where('user_id', $user->id)
+                ->get();
+
+            $totalUnpaid = $unpaidInvoices->reduce(function ($carry, $invoice) use ($baseCurrency) {
+                $rate = $this->currencyService->getConversionRate($invoice->currency, $baseCurrency) ?? 1.0;
+                return $carry + ($invoice->total_amount * $rate);
+            }, 0);
+
+            // 2. Считаем ДОХОД ЗА МЕСЯЦ, конвертируя каждую в RUB
+            $paidInvoicesThisMonth = Invoice::where('user_id', $user->id)
                 ->where('status', 'paid')
                 ->whereMonth('updated_at', now()->month)
                 ->whereYear('updated_at', now()->year)
-                ->sum('total_amount');
+                ->get();
             
+            $incomeThisMonth = $paidInvoicesThisMonth->reduce(function ($carry, $invoice) use ($baseCurrency) {
+                $rate = $this->currencyService->getConversionRate($invoice->currency, $baseCurrency) ?? 1.0;
+                return $carry + ($invoice->total_amount * $rate);
+            }, 0);
+
+            // 3. Остальная логика без изменений
             $unbilledSeconds = TimeEntry::where('user_id', $user->id)
                 ->whereDoesntHave('invoiceItem')
                 ->get()
@@ -38,7 +59,6 @@ class DashboardController extends Controller
                 ->with('project.client')
                 ->first();
 
-            // Эта часть выполнится только если данных в кэше нет
             return [
                 'totalUnpaid' => (float) $totalUnpaid,
                 'incomeThisMonth' => (float) $incomeThisMonth,
