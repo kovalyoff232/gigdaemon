@@ -5,9 +5,9 @@ name: Run Laravel Tests
 # 2. Когда кто-то (или ты) создает Pull Request в ветку `main`.
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "master" ]
 
 jobs:
   laravel-tests:
