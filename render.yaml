@@ -16,7 +16,7 @@ services:
           name: gigdaemon-db
           property: connectionString
       - key: APP_URL
-        value: https://gigdaemon.onrender.com # Заменишь на свой реальный адрес
+        value: https://gigdaemon.onrender.com # Заменишь на свой
       - key: APP_ENV
         value: production
       - key: APP_DEBUG

@@ -15,9 +15,6 @@ import { createApp } from 'vue';
 
 const app = createApp({});
 
-import ExampleComponent from './components/ExampleComponent.vue';
-app.component('example-component', ExampleComponent);
-
 
 import DashboardComponent from './components/DashboardComponent.vue';
 app.component('dashboard-component', DashboardComponent);
