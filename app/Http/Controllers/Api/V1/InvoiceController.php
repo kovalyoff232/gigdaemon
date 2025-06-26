@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\TimeEntry;
-use App\Services\CurrencyService; // Наше новое оружие
+use App\Services\CurrencyService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
@@ -22,10 +22,31 @@ class InvoiceController extends Controller
     {
         $this->currencyService = $currencyService;
     }
+
+    private function clearDashboardCache(): void
+    {
+        if (auth()->check()) {
+            Cache::forget("user:".auth()->id().":dashboard-summary");
+        }
+    }
     
-    // ... методы index, show, getUnbilledEntries, downloadPDF, updateStatus без изменений ...
-    // НО МЫ ПЕРЕПИШЕМ STORE
+    public function index(Request $request)
+    {
+        return $request->user()->invoices()->with('client')->latest('issue_date')->get();
+    }
     
+    public function show(Invoice $invoice)
+    {
+        $this->authorize('view', $invoice);
+        return $invoice->load(['items', 'client', 'user']);
+    }
+
+    public function getUnbilledEntries(Client $client)
+    {
+        $this->authorize('view', $client);
+        return $client->timeEntries()->with('project')->whereDoesntHave('invoiceItem')->orderBy('start_time', 'desc')->get();
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -89,7 +110,23 @@ class InvoiceController extends Controller
             return response()->json($invoice->load('items', 'client'), Response::HTTP_CREATED);
         });
     }
-    
-    // ... остальные методы ...
-    private function clearDashboardCache(): void { /* ... */ }
+
+    public function downloadPDF(Invoice $invoice)
+    {
+        $this->authorize('view', $invoice);
+        $invoice->load(['items', 'client', 'user']);
+        $pdf = Pdf::loadView('invoices.pdf', ['invoice' => $invoice]);
+        return $pdf->download('invoice-' . $invoice->invoice_number . '.pdf');
+    }
+	
+	public function updateStatus(Request $request, Invoice $invoice)
+    {
+        $this->authorize('update', $invoice);
+        $validated = $request->validate([
+            'status' => ['required', \Illuminate\Validation\Rule::in(['draft', 'sent', 'paid', 'overdue'])],
+        ]);
+        $invoice->update(['status' => $validated['status']]);
+        $this->clearDashboardCache();
+        return response()->json($invoice);
+    }
 }
