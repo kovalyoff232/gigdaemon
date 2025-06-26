@@ -1,18 +1,21 @@
-# Это Blueprint. Единый файл для описания всего нашего приложения.
-services:
-  # Наша база данных PostgreSQL
-  - type: postgres # <-- ВОТ ОНО. ПРАВИЛЬНОЕ СЛОВО.
-    name: gigdaemon-db
+# Это Blueprint. Единый, правильный, выстраданный чертеж.
+# Основан на документации, которую нашел ты.
+
+# === КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Базы данных объявляются в отдельном списке ===
+databases:
+  - name: gigdaemon-db
+    # Здесь не нужен 'type', потому что сам список 'databases' определяет тип.
     region: frankfurt
     plan: free
     postgresMajorVersion: 15
 
+# === А сервисы - в своем собственном списке ===
+services:
   # Наш веб-сервер на Laravel
-  - type: web
+  - type: web # Это правильный тип для веб-сервиса
     name: gigdaemon
     region: frankfurt
     plan: free
-    # Указываем, что наша среда - это PHP
     runtime: php
     buildCommand: |
       composer install --no-dev --no-interaction --optimize-autoloader
@@ -23,7 +26,6 @@ services:
       npm install
       npm run build
     startCommand: "php artisan serve --host 0.0.0.0 --port 10000"
-    # Переменные окружения.
     envVars:
       - key: APP_URL
         fromService:
@@ -36,11 +38,11 @@ services:
         value: false
       - key: LOG_CHANNEL
         value: stderr
-      # Подключаемся к нашей базе данных по ее внутреннему адресу
       - key: DATABASE_URL
         fromService:
-          type: postgres # <-- И ЗДЕСЬ ТОЖЕ.
+          # Здесь 'psql' - это правильный тип ресурса, на который мы ссылаемся.
+          type: psql
           name: gigdaemon-db
           property: connectionString
       - key: APP_KEY
-        sync: false
+        sync: false # Секрет, который мы добавим вручную в интерфейсе Render.
