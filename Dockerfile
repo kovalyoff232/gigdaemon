@@ -1,68 +1,61 @@
-# --- АРГУМЕНТЫ ---
-ARG PHP_VERSION=8.2
-ARG NODE_VERSION=20
-ARG COMPOSER_VERSION=2
-
-# --- ЭТАП 1: Базовый образ PHP ---
-FROM php:${PHP_VERSION}-fpm-alpine AS base
-WORKDIR /var/www/html
-
-# Устанавливаем системные зависимости
-RUN apk add --no-cache \
-    bash \
-    curl \
-    libzip-dev \
-    zip \
-    postgresql-dev
-
-# Устанавливаем расширения PHP
-RUN docker-php-ext-install pdo pdo_pgsql zip
-
-# Устанавливаем Composer
-COPY --from=composer:${COMPOSER_VERSION} /usr/bin/composer /usr/bin/composer
-
-
-# --- ЭТАП 2: Установка PHP зависимостей ---
-FROM base AS vendor
-WORKDIR /var/www/html
-
-# Копируем файлы и устанавливаем зависимости
+# --- ЭТАП 1: Устанавливаем зависимости PHP ---
+# Используем официальный образ Composer, чтобы получить сам Composer.
+FROM composer:2.7 as vendor
+WORKDIR /app
+# Копируем только файлы для зависимостей.
 COPY database/ database/
 COPY composer.json composer.json
 COPY composer.lock composer.lock
-RUN composer install --no-interaction --no-dev --optimize-autoloader
+# Устанавливаем зависимости без запуска скриптов, чтобы избежать ошибок с artisan.
+RUN composer install --no-interaction --no-scripts --no-dev --optimize-autoloader
 
-
-# --- ЭТАП 3: Сборка фронтенда ---
-FROM node:${NODE_VERSION}-alpine AS frontend
+# --- ЭТАП 2: Собираем фронтенд ---
+# Используем современную и стабильную LTS-версию Node.
+FROM node:20-alpine as frontend
 WORKDIR /app
-
 COPY package.json package.json
 COPY package-lock.json* package-lock.json
 RUN npm install
-
 COPY . .
 RUN npm run build
 
-
-# --- ЭТАП 4: Финальный образ для продакшена ---
-FROM base AS final
+# --- ЭТАП 3: Собираем финальный образ ---
+# Начинаем с чистого PHP.
+FROM php:8.2-fpm-alpine
 WORKDIR /var/www/html
 
-# Копируем весь код приложения
+# Устанавливаем системные зависимости, необходимые для Laravel и Postgres.
+# 'bash' нужен для нашего start.sh скрипта.
+RUN apk add --no-cache \
+      bash \
+      libzip-dev \
+      zip \
+      postgresql-dev \
+    && docker-php-ext-install \
+      pdo \
+      pdo_pgsql \
+      zip
+
+# Копируем Composer из его официального образа, чтобы он был доступен в финальном контейнере.
+COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+
+# Копируем весь код приложения.
 COPY . .
 
-# Копируем собранные артефакты из предыдущих этапов
-COPY --from=vendor /var/www/html/vendor/ /var/www/html/vendor/
+# Копируем УЖЕ собранные зависимости из предыдущих этапов.
+COPY --from=vendor /app/vendor/ /var/www/html/vendor/
 COPY --from=frontend /app/public/build/ /var/www/html/public/build/
 
-# Настраиваем права доступа
+# Теперь, когда весь код и Composer на месте, мы можем безопасно запустить скрипты Laravel.
+RUN composer dump-autoload --optimize
+
+# Настраиваем права доступа для папок, в которые Laravel будет писать.
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Копируем и делаем исполняемым наш скрипт запуска
+# Копируем наш скрипт запуска и делаем его исполняемым.
 COPY start.sh .
 RUN chmod +x ./start.sh
 
-# Команда для запуска контейнера
+# Указываем, что этот скрипт нужно запустить, когда контейнер стартует.
 CMD ["./start.sh"]
