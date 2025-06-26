@@ -1,61 +1,103 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# GigDaemon: A Freelance Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+GigDaemon is a full-stack web application designed to serve as a comprehensive project management and invoicing tool for freelancers and independent contractors. Built with Laravel 12 and Vue 3, this project demonstrates a complete development lifecycle, from initial architecture to production deployment with CI/CD.
 
-## About Laravel
+This application is engineered to handle core business logic, including client and project management, time tracking, and invoice generation, showcasing the ability to build robust, scalable, and professional-grade systems.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Screenshots
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Dashboard | Invoicing |
+| :---: | :---: |
+| ![Dashboard Screenshot](link_to_dashboard_screenshot.png) | ![Invoices Screenshot](link_to_invoices_screenshot.png) |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Invoice Detail View | Generated PDF Invoice |
+| :---: | :---: |
+| ![Invoice Detail Screenshot](link_to_invoice_detail_screenshot.png) | ![Invoice PDF Screenshot](link_to_invoice_pdf_screenshot.png) |
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Key Features
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+*   **Client & Project Management (CRUD):** Full capabilities to create, read, update, and delete clients and their associated projects. Projects are hierarchically managed under their respective clients.
+*   **Advanced Time Tracking:**
+    *   **Live Timer:** Start and stop a timer for any active project.
+    *   **Manual Entry:** Manually add time entries for work performed offline.
+    *   **Full Edit Control:** Modify or delete any time record to ensure accurate billing.
+*   **Invoicing & Financials:**
+    *   **Smart Invoice Generation:** Create detailed invoices by selecting a client and their unbilled time entries.
+    *   **Customizable Rates:** Set a default hourly rate for each client, which is automatically used during invoice creation.
+    *   **Status Management:** Update invoice statuses (`Draft`, `Sent`, `Paid`, `Overdue`) directly from the UI.
+    *   **PDF Generation:** Download professionally formatted PDF invoices for client delivery.
+*   **Interactive Dashboard:**
+    *   Provides an at-a-glance summary of total outstanding payments, monthly income, and total unbilled hours.
+    *   A persistent indicator for any currently active timer.
+*   **Security & Authorization:**
+    *   API authentication powered by **Laravel Sanctum**.
+    *    granular access control using **Laravel Policies** to ensure users can only access their own data.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Technology Stack
 
-## Laravel Sponsors
+*   **Backend:**
+    *   **Laravel 12** / PHP 8.2
+    *   **PostgreSQL**
+    *   RESTful API
+    *   **Laravel Sanctum** (API Authentication)
+    *   `barryvdh/laravel-dompdf` (PDF Generation)
+*   **Frontend:**
+    *   **Vue.js 3** (Composition API)
+    *   **Vite** (Build Tool)
+    *   **Bootstrap 5** / Sass (Styling)
+*   **Testing & Deployment:**
+    *   **PHPUnit** (Backend Testing)
+    *   **Docker** (Containerization)
+    *   **Render.com** (Hosting)
+    *   **CI/CD** via `render.yaml` (Infrastructure as Code)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## Local Setup & Installation
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/kovalyoff232/gigdaemon.git
+    cd gigdaemon
+    ```
 
-## Contributing
+2.  **Install dependencies:**
+    ```bash
+    composer install
+    npm install
+    ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+3.  **Configure environment:**
+    *   Copy `.env.example` to `.env`: `cp .env.example .env`
+    *   Configure your local database connection (PostgreSQL/MySQL) in the `.env` file.
+    *   Generate the application key: `php artisan key:generate`
 
-## Code of Conduct
+4.  **Run database migrations:**
+    ```bash
+    php artisan migrate
+    ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+5.  **Run the development servers:**
+    *   In one terminal, start the Vite server: `npm run dev`
+    *   In a second terminal, start the Laravel server: `php artisan serve`
 
-## Security Vulnerabilities
+6.  Access the application at `http://127.0.0.1:8000`. Register a new user to begin.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Running Tests
 
-## License
+To execute the backend test suite, run the following command:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan test
+
+
+
+Deployment
+This project is configured for zero-downtime, continuous deployment to Render.com using a render.yaml Blueprint file.
+On every push to the master branch, a new Docker image is built automatically.
+The build process installs all dependencies, compiles frontend assets, and runs Laravel-specific optimizations.
+Database migrations are applied automatically before the new version goes live.
+The application is connected to a PostgreSQL database, also managed by the Blueprint.
+All necessary environment variables (excluding secrets like APP_KEY) are defined as Infrastructure as Code within the render.yaml file.
