@@ -28,8 +28,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Здесь мы говорим Laravel, какую политику использовать для какой модели.
-        // Это как установить правила доступа в нашем цифровом замке.
+
         Gate::policy(Client::class, ClientPolicy::class);
         Gate::policy(Project::class, ProjectPolicy::class);
         Gate::policy(TimeEntry::class, TimeEntryPolicy::class);

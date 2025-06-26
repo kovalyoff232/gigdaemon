@@ -174,17 +174,14 @@ const closeClientModal = () => clientModalInstance?.hide();
 const handleSubmitClient = async () => {
     try {
         if (isEditMode.value) {
-            // ОБНОВЛЕНИЕ: Находим клиента и заменяем его данные
             const response = await axios.put(`/api/clients/${clientForm.id}`, clientForm);
             const index = clients.value.findIndex(c => c.id === clientForm.id);
             if (index !== -1) {
-                // Сохраняем проекты, чтобы они не потерялись при обновлении
                 response.data.projects = clients.value[index].projects;
                 clients.value[index] = response.data;
             }
             toast.success('Клиент успешно обновлен!');
         } else {
-            // СОЗДАНИЕ: Добавляем нового клиента в конец списка
             const response = await axios.post('/api/clients', clientForm);
             response.data.projects = []; // У нового клиента еще нет проектов
             clients.value.push(response.data);
@@ -214,11 +211,8 @@ const handleSubmitProject = async () => {
             }
             toast.success('Проект успешно обновлен!');
         } else {
-            // --- ГЛАВНОЕ ИЗМЕНЕНИЕ ЗДЕСЬ ---
-            // Мы больше не вызываем fetchClients()
             const response = await axios.post('/api/projects', projectForm);
             const newProject = response.data;
-            // А просто находим нужного клиента и добавляем ему проект
             const client = clients.value.find(c => c.id === newProject.client_id);
             if (client) {
                 if (!client.projects) {
@@ -234,7 +228,7 @@ const handleSubmitProject = async () => {
     }
 };
 
-// --- Методы для Записей Времени (без изменений) ---
+// --- Методы для Записей Времени ---
 const fetchTimeEntries = async (projectId) => { try { const response = await axios.get(`/api/projects/${projectId}/time-entries`); timeEntries[projectId] = response.data; } catch (error) { handleError(error, `записей времени`); } };
 const handleStartTimeTracking = async (project) => { try { const response = await axios.post(`/api/projects/${project.id}/time-entries/start`, { description: timeEntryDescriptions[project.id] || null, }); activeTimeEntry.value = response.data; startTimerDisplay(response.data.start_time); toast.success(`Таймер для "${project.title}" запущен!`); fetchSummary(); } catch (error) { handleError(error, 'запуска таймера'); } };
 const handleStopTimeTracking = async () => { if (!activeTimeEntry.value) return; try { const response = await axios.patch(`/api/time-entries/${activeTimeEntry.value.id}/stop`); const stoppedEntry = response.data; const projectEntries = timeEntries[stoppedEntry.project_id]; if (projectEntries) { const index = projectEntries.findIndex(e => e.id === stoppedEntry.id); if (index !== -1) { projectEntries[index] = stoppedEntry; } else { projectEntries.unshift(stoppedEntry); } } activeTimeEntry.value = null; stopTimerDisplay(); toast.info('Таймер остановлен.'); fetchSummary(); } catch (error) { handleError(error, 'остановки таймера'); } };
@@ -243,12 +237,12 @@ const closeTimeEntryModal = () => timeEntryModalInstance?.hide();
 const handleSubmitTimeEntry = async () => { try { const response = await axios.put(`/api/time-entries/${timeEntryForm.id}`, timeEntryForm); const updatedEntry = response.data; const projectEntries = timeEntries[updatedEntry.project_id]; if(projectEntries) { const index = projectEntries.findIndex(e => e.id === updatedEntry.id); if (index !== -1) projectEntries[index] = updatedEntry; } toast.success('Запись времени обновлена.'); closeTimeEntryModal(); fetchSummary(); } catch (error) { handleError(error, 'обновления записи'); } };
 const handleDeleteTimeEntry = async (entry) => { if (confirm('Удалить эту запись времени?')) { try { await axios.delete(`/api/time-entries/${entry.id}`); toast.success('Запись времени удалена.'); await fetchTimeEntries(entry.project_id); fetchSummary(); } catch (error) { handleError(error, 'удаления записи'); } } };
 
-// --- Методы для ручного ввода (без изменений) ---
+// --- Методы для ручного ввода ---
 const openManualTimeEntryModal = (projectId = null, clientId = null) => { let initialProjectId = projectId; if (!initialProjectId && clientId) { const client = clients.value.find(c => c.id === clientId); if (client?.projects?.length > 0) { initialProjectId = client.projects[0].id; } } Object.assign(manualTimeEntryForm, { project_id: initialProjectId, description: '', start_time: '', end_time: ''}); manualTimeEntryModalInstance?.show(); };
 const closeManualTimeEntryModal = () => manualTimeEntryModalInstance?.hide();
 const handleStoreManualTimeEntry = async () => { const { project_id, ...payload } = manualTimeEntryForm; if (!project_id) { toast.error('Выберите проект!'); return; } try { await axios.post(`/api/projects/${project_id}/time-entries/manual`, payload); toast.success('Запись времени добавлена.'); closeManualTimeEntryModal(); if (timeEntries[project_id]) { await fetchTimeEntries(project_id); } else { const project = allProjects.value.find(p => p.id === project_id); if (project) { const client = clients.value.find(c => c.id === project.client_id); if (client && !client.projects.some(p => p.id === project_id)) { await fetchClients(); } else { await fetchTimeEntries(project_id); } } } fetchSummary(); } catch (error) { handleError(error, 'добавления записи'); } };
 
-// --- Общие и служебные методы (без изменений) ---
+// --- Общие и служебные методы ---
 const handleError = (error, entityName) => { formErrors.value = {}; if (error.response?.status === 422) { formErrors.value = error.response.data.errors; toast.error("Проверьте правильность заполнения полей"); } else if (error.response?.data?.message) { toast.error(`Ошибка: ${error.response.data.message}`); } else { console.error(`Ошибка при операции с ${entityName}:`, error); toast.error(`Произошла ошибка при операции с ${entityName}.`); } };
 const checkForActiveTimer = async () => { try { const response = await axios.get('/api/time-entries/active'); if (response.data) { activeTimeEntry.value = response.data; startTimerDisplay(response.data.start_time); } } catch (error) { console.error("Ошибка проверки таймера:", error); } };
 const startTimerDisplay = (startTime) => { stopTimerDisplay(); const start = new Date(startTime); timerInterval = setInterval(() => { const now = new Date(); const diff = Math.floor((now - start) / 1000); timerValue.value = formatDuration(diff); }, 1000); };
@@ -258,7 +252,7 @@ const formatDatetimeForInput = (dateTimeString) => { if (!dateTimeString) return
 const toggleClient = (clientId) => { const el = document.getElementById(`collapse${clientId}`); if (el) { if (!collapseInstances[clientId]) { collapseInstances[clientId] = new Collapse(el, { toggle: false }); } collapseInstances[clientId].toggle(); }};
 const toggleProject = async (projectId) => { const el = document.getElementById(`collapseProject${projectId}`); const key = `project_${projectId}`; if (el) { if (!collapseInstances[key]) { collapseInstances[key] = new Collapse(el, { toggle: false }); } collapseInstances[key].toggle(); } if (!timeEntries[projectId]) { await fetchTimeEntries(projectId); }};
 
-// --- Хуки жизненного цикла (без изменений) ---
+// --- Хуки жизненного цикла ---
 onMounted(async () => {
     clientsLoading.value = true;
     clientModalInstance = clientModal.value ? new Modal(clientModal.value) : null;

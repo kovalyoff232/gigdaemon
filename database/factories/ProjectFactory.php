@@ -19,9 +19,7 @@ class ProjectFactory extends Factory
     public function definition(): array
     {
         return [
-            // Мы не можем просто создать пользователя и клиента.
-            // Проект должен принадлежать клиенту, который принадлежит пользователю.
-            // Поэтому мы определим их в самих тестах для ясности.
+        
             'user_id' => User::factory(),
             'client_id' => Client::factory(),
             'title' => $this->faker->bs(),

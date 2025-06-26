@@ -11,8 +11,7 @@ class StoreClientRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Мы разрешаем любому аутентифицированному пользователю пытаться создать клиента.
-        // Более тонкие проверки (например, по подписке) были бы здесь.
+
         return true;
     }
 

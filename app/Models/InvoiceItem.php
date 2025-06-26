@@ -9,7 +9,6 @@ class InvoiceItem extends Model
 {
     use HasFactory;
     
-    // Отключаем автоматические timestamps, если они не нужны для позиций
     public $timestamps = false;
 
     protected $fillable = [

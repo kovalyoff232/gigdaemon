@@ -10,7 +10,7 @@ jobs:
   laravel-tests:
     runs-on: ubuntu-latest
     steps:
-      # --- ШАГ 1: Подготовка окружения ---
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -20,18 +20,17 @@ jobs:
           php-version: '8.2'
           extensions: pdo, pdo_pgsql, zip
           
-      # --- ШАГ 2: Установка зависимостей PHP ---
-      - name: Copy .env file
+
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
         
       - name: Install Composer Dependencies
         run: composer install --no-interaction --no-progress --no-suggest
 
-      # --- ШАГ 2.5: СБОРКА ФРОНТЕНДА (ВОТ ОНО!) ---
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Как в твоем Dockerfile
+          node-version: '20' 
 
       - name: Install NPM Dependencies
         run: npm install
@@ -39,7 +38,7 @@ jobs:
       - name: Build assets
         run: npm run build
 
-      # --- ШАГ 3: Запуск тестов ---
+
       - name: Generate an application key
         run: php artisan key:generate
 

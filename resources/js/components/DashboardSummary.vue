@@ -46,7 +46,6 @@
 </template>
 
 <script setup>
-// Этот компонент теперь "тупой". Он просто принимает данные и отображает их.
 const props = defineProps({
     summaryData: {
         type: Object,

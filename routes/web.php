@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan; // Добавь эту строчку
+use Illuminate\Support\Facades\Artisan;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,8 +25,7 @@ Route::get('/invoices', [App\Http\Controllers\HomeController::class, 'invoices']
 Route::get('/invoices/{invoice}', [App\Http\Controllers\HomeController::class, 'showInvoice'])->name('invoices.show');
 Route::get('/invoices/{invoice}/download', [\App\Http\Controllers\Api\V1\InvoiceController::class, 'downloadPDF'])->name('invoices.download');
 
-// --- НАШ СЕКРЕТНЫЙ РЫЧАГ ---
-// Замени 'KJH234G5H6J3K4L' на любую свою абракадабру
+
 Route::get('/system/clear-cache/KJH234G5H6J3K4L', function() {
     Artisan::call('cache:clear');
     return "Application cache cleared successfully.";

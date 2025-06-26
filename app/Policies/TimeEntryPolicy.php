@@ -8,7 +8,6 @@ use Illuminate\Auth\Access\Response;
 
 class TimeEntryPolicy
 {
-    // Все проверки сводятся к одной: принадлежит ли запись пользователю.
     private function isOwner(User $user, TimeEntry $timeEntry): bool
     {
         return $user->id === $timeEntry->user_id;

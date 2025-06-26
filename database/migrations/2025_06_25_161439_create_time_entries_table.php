@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('time_entries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('project_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Для удобства и политик
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); 
             $table->dateTime('start_time');
-            $table->dateTime('end_time')->nullable(); // null, если таймер еще тикает
+            $table->dateTime('end_time')->nullable(); 
             $table->text('description')->nullable();
             $table->timestamps();
         });

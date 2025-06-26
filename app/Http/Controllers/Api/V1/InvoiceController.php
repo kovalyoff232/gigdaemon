@@ -53,8 +53,8 @@ class InvoiceController extends Controller
             'client_id' => 'required|exists:clients,id',
             'time_entry_ids' => 'required|array|min:1',
             'time_entry_ids.*' => 'required|integer|exists:time_entries,id',
-            'base_rate' => 'required|numeric|min:0', // Это ставка в ВАШЕЙ основной валюте (RUB)
-            'currency' => 'required|string|size:3', // Валюта, в которой будет счет (USD, EUR...)
+            'base_rate' => 'required|numeric|min:0', 
+            'currency' => 'required|string|size:3',
             'issue_date' => 'required|date',
             'due_date' => 'required|date|after_or_equal:issue_date',
             'notes' => 'nullable|string',
@@ -64,12 +64,11 @@ class InvoiceController extends Controller
             $user = auth()->user();
             $client = Client::findOrFail($validated['client_id']);
 
-            // Проверяем, что пользователь владеет клиентом
+            
             if ($client->user_id !== $user->id) {
                 abort(Response::HTTP_FORBIDDEN, 'Это не ваш клиент.');
             }
 
-            // Получаем курс конвертации. Наша основная валюта - RUB.
             $rate = $this->currencyService->getConversionRate('RUB', $validated['currency']);
             if ($rate === null) {
                 throw ValidationException::withMessages(['currency' => 'Не удалось получить курс для выбранной валюты.']);
@@ -86,11 +85,11 @@ class InvoiceController extends Controller
                 'issue_date' => $validated['issue_date'],
                 'due_date' => $validated['due_date'],
                 'notes' => $validated['notes'] ?? null,
-                'currency' => $validated['currency'], // Сохраняем валюту счета
+                'currency' => $validated['currency'], 
             ]);
 
             $totalAmount = 0;
-            $unitPriceInTargetCurrency = $validated['base_rate'] * $rate; // Цена за час в валюте счета
+            $unitPriceInTargetCurrency = $validated['base_rate'] * $rate; 
 
             foreach ($timeEntries as $entry) {
                 $quantity = $entry->duration / 3600;
@@ -99,7 +98,7 @@ class InvoiceController extends Controller
                     'time_entry_id' => $entry->id,
                     'description' => $entry->description ?: 'Работа по проекту: ' . $entry->project->title,
                     'quantity' => $quantity,
-                    'unit_price' => $unitPriceInTargetCurrency, // Сохраняем цену в валюте счета
+                    'unit_price' => $unitPriceInTargetCurrency, 
                     'subtotal' => $subtotal,
                 ]);
                 $totalAmount += $subtotal;

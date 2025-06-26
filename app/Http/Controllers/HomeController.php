@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-// === ВОТ ОНО. КАРТА К СОКРОВИЩНИЦЕ ===
 use App\Models\Invoice;
 
 class HomeController extends Controller
@@ -38,15 +37,10 @@ class HomeController extends Controller
         return view('invoices.index');
     }
     
-    /**
-     * Показать страницу одного счета.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
+
     public function showInvoice(Invoice $invoice)
     {
-        // Теперь, благодаря "use App\Models\Invoice;" вверху,
-        // Laravel точно знает, где искать модель Invoice.
+
         return view('invoices.show', ['invoiceId' => $invoice->id]);
     }
 }

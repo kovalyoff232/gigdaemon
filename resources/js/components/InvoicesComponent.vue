@@ -127,7 +127,7 @@ let invoiceModalInstance = null;
 const invoiceModal = ref(null);
 const unbilled = reactive({ loading: false, entries: [] });
 
-// Форма теперь сложнее
+
 const form = reactive({
     client_id: '',
     time_entry_ids: [],

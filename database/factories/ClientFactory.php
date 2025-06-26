@@ -18,7 +18,7 @@ class ClientFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory(), // Автоматически создаст и привяжет пользователя
+            'user_id' => User::factory(), 
             'name' => $this->faker->company(),
             'email' => $this->faker->unique()->safeEmail(),
             'phone' => $this->faker->phoneNumber(),

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('clients', function (Blueprint $table) {
             $table->decimal('default_rate', 10, 2)->nullable()->after('phone');
-            // ВОТ ОНО. ВАЛЮТА КЛИЕНТА.
+
             $table->string('default_currency', 3)->default('RUB')->after('default_rate');
         });
     }

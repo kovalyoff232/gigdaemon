@@ -77,7 +77,7 @@ const formatDate = (dateString) => new Date(dateString).toLocaleDateString('ru-R
 const formatCurrency = (amount) => new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(amount);
 const formatStatus = (status) => { const statuses = { draft: 'Черновик', sent: 'Отправлен', paid: 'Оплачен', overdue: 'Просрочен' }; return statuses[status] || status; };
 
-// Меняем цвет кнопки в зависимости от статуса
+
 const statusButtonClass = (status) => {
     const classes = {
         draft: 'btn-secondary',

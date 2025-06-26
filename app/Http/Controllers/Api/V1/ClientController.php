@@ -17,8 +17,7 @@ class ClientController extends Controller
      */
     public function index()
 {
-    // Мы говорим: "Дай мне всех клиентов, и СРАЗУ ЖЕ подгрузи для каждого из них все его проекты".
-    // Это одна из самых важных техник оптимизации в Laravel.
+
     return auth()->user()->clients()->with('projects')->get();
 }
 
@@ -27,8 +26,7 @@ class ClientController extends Controller
      */
     public function store(StoreClientRequest $request)
     {
-        // Валидация происходит автоматически в StoreClientRequest.
-        // Мы просто создаем клиента с уже проверенными данными.
+       
         $client = auth()->user()->clients()->create($request->validated());
 
         return response()->json($client, Response::HTTP_CREATED);
@@ -39,8 +37,7 @@ class ClientController extends Controller
      */
     public function show(Client $client)
     {
-        // Эта проверка ('view', $client) пока не работает, но мы ее скоро починим.
-        // Она нужна, чтобы пользователь не мог посмотреть чужого клиента.
+       
         $this->authorize('view', $client);
 
         return $client;
@@ -51,10 +48,9 @@ class ClientController extends Controller
      */
     public function update(UpdateClientRequest $request, Client $client)
     {
-        // Проверка прав доступа
+       
         $this->authorize('update', $client);
 
-        // Валидация и обновление данных
         $client->update($request->validated());
 
         return response()->json($client);
@@ -65,12 +61,10 @@ class ClientController extends Controller
      */
     public function destroy(Client $client)
     {
-        // Проверка прав доступа
         $this->authorize('delete', $client);
 
         $client->delete();
 
-        // Успешный ответ без тела
         return response()->noContent();
     }
 }

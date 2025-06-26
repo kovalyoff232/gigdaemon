@@ -31,7 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('projects', ProjectController::class);
     Route::apiResource('invoices', InvoiceController::class);
     
-    // --- Маршруты для управления ВРЕМЕНЕМ ---
+
     Route::get('/projects/{project}/time-entries', [TimeEntryController::class, 'index']);
     Route::post('/projects/{project}/time-entries/start', [TimeEntryController::class, 'start']);
     Route::patch('/time-entries/{time_entry}/stop', [TimeEntryController::class, 'stop']);

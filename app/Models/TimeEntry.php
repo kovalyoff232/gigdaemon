@@ -24,7 +24,7 @@ class TimeEntry extends Model
         'end_time' => 'datetime',
     ];
 
-    // Добавляем вычисляемое поле, чтобы фронтенду было удобнее
+
     protected $appends = ['duration'];
 
     public function project()
@@ -39,21 +39,19 @@ class TimeEntry extends Model
 	
 	public function invoiceItem()
 	{
-		// У одной записи времени может быть только одна позиция в счете.
+
 		return $this->hasOne(InvoiceItem::class);
 	}
     
-    // Аксессор для вычисления продолжительности в секундах
     protected function duration(): Attribute
     {
         return Attribute::make(
             get: function () {
                 if (!$this->end_time) {
-                    return 0; // или null, если предпочитаешь
+                    return 0; 
                 }
                 
-                // ЗАМЕНЯЕМ НЕПОНЯТНЫЙ diffInSeconds НА ПРЯМОЕ ВЫЧИТАНИЕ ВРЕМЕННЫХ МЕТОК.
-                // ЭТО НЕ МОЖЕТ ДАТЬ СБОЙ.
+
                 return $this->end_time->timestamp - $this->start_time->timestamp;
             },
         );
