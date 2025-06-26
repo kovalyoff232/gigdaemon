@@ -8,12 +8,19 @@ use App\Models\Invoice;
 use App\Models\TimeEntry;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-// === ИСПРАВЛЕНИЕ ЗДЕСЬ. Я УКАЗЫВАЮ ПОЛНЫЙ ПУТЬ К ТИПОГРАФИИ ===
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceController extends Controller
 {
+    private function clearDashboardCache(): void
+    {
+        if (auth()->check()) {
+            Cache::forget("user:".auth()->id().":dashboard-summary");
+        }
+    }
+    
     public function index(Request $request)
     {
         return $request->user()->invoices()->with('client')->latest('issue_date')->get();
@@ -73,6 +80,7 @@ class InvoiceController extends Controller
                 $totalAmount += $subtotal;
             }
             $invoice->update(['total_amount' => $totalAmount]);
+            $this->clearDashboardCache();
             return response()->json($invoice->load('items', 'client'), Response::HTTP_CREATED);
         });
     }
@@ -88,15 +96,11 @@ class InvoiceController extends Controller
 	public function updateStatus(Request $request, Invoice $invoice)
     {
         $this->authorize('update', $invoice);
-
         $validated = $request->validate([
             'status' => ['required', \Illuminate\Validation\Rule::in(['draft', 'sent', 'paid', 'overdue'])],
         ]);
-
         $invoice->update(['status' => $validated['status']]);
-
-        // Возвращаем обновленный счет
+        $this->clearDashboardCache();
         return response()->json($invoice);
     }
-	
 }

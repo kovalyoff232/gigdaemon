@@ -4,6 +4,13 @@ databases:
     plan: free
 
 services:
+  # --- НАШ НОВЫЙ СЕРВИС REDIS ---
+  - type: redis
+    name: gigdaemon-redis
+    region: frankfurt
+    plan: free
+    maxmemoryPolicy: allkeys-lru # Стратегия вытеснения, когда память кончится
+
   - type: web
     name: gigdaemon
     region: frankfurt
@@ -11,7 +18,7 @@ services:
     runtime: docker
     healthCheckPath: /up
     envVars:
-      # --- ЯВНОЕ, ТУПОЕ, НАДЕЖНОЕ ПОДКЛЮЧЕНИЕ К БАЗЕ ДАННЫХ ---
+      # --- Старые переменные ---
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
@@ -34,24 +41,37 @@ services:
         fromDatabase:
           name: gigdaemon-db
           property: password
-
-      # --- Настройки Приложения ---
       - key: APP_URL
-        value: https://gigdaemon.onrender.com # Замени на свой
+        value: https://gigdaemon.onrender.com # Убедись, что это твой URL
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: false
       - key: LOG_CHANNEL
         value: stderr
-
-      # --- Настройки для работы в продакшене ---
+      
+      # --- Новые и измененные переменные ---
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: gigdaemon-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: gigdaemon-redis
+          property: port
+      - key: REDIS_PASSWORD
+        fromService:
+          type: redis
+          name: gigdaemon-redis
+          property: password
       - key: CACHE_DRIVER
-        value: array
+        value: redis # Было 'array'
       - key: QUEUE_CONNECTION
-        value: sync
+        value: redis # Было 'sync'
       - key: SESSION_DRIVER
-        value: cookie
+        value: redis # Было 'cookie'
       - key: SESSION_LIFETIME
         value: 120
       
