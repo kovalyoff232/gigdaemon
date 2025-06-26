@@ -1,48 +1,46 @@
-# Это Blueprint. Единый, правильный, выстраданный чертеж.
-# Основан на документации, которую нашел ты.
+# Этот Blueprint основан на документации, которую предоставил ты.
 
-# === КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Базы данных объявляются в отдельном списке ===
-databases:
-  - name: gigdaemon-db
-    # Здесь не нужен 'type', потому что сам список 'databases' определяет тип.
-    region: frankfurt
-    plan: free
-    postgresMajorVersion: 15
-
-# === А сервисы - в своем собственном списке ===
+# Определяем наши сервисы.
 services:
-  # Наш веб-сервер на Laravel
-  - type: web # Это правильный тип для веб-сервиса
+  # Наш веб-сервер на Laravel.
+  # Мы используем Docker, так как это единственно правильный способ для PHP,
+  # согласно документации.
+  - type: web
     name: gigdaemon
     region: frankfurt
     plan: free
-    runtime: php
-    buildCommand: |
-      composer install --no-dev --no-interaction --optimize-autoloader
-      php artisan migrate --force
-      php artisan config:cache
-      php artisan route:cache
-      php artisan view:cache
-      npm install
-      npm run build
-    startCommand: "php artisan serve --host 0.0.0.0 --port 10000"
+    runtime: docker
+    # buildCommand и startCommand не нужны, когда используется Docker.
+    # Render будет использовать команды из файла Dockerfile в твоем репозитории.
+    healthCheck:
+      path: /up
     envVars:
       - key: APP_URL
-        fromService:
-          type: web
-          name: gigdaemon
-          property: url
+        # Так как свойство 'url' невалидно, мы будем вводить его вручную
+        # после первого деплоя, как и APP_KEY.
+        value: https://gigdaemon.onrender.com # Заменишь на свой реальный адрес позже
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: false
       - key: LOG_CHANNEL
         value: stderr
+      # --- ССЫЛКА НА БАЗУ ДАННЫХ ---
+      # Документация говорит, что для PostgreSQL нужно использовать fromDatabase.
+      # Но fromDatabase можно использовать только в envVarGroups, а не напрямую в сервисе.
+      # Поэтому мы будем ссылаться на нее как на другой сервис.
+      # Самый надежный способ - взять connectionString.
       - key: DATABASE_URL
         fromService:
-          # Здесь 'psql' - это правильный тип ресурса, на который мы ссылаемся.
           type: psql
           name: gigdaemon-db
           property: connectionString
       - key: APP_KEY
-        sync: false # Секрет, который мы добавим вручную в интерфейсе Render.
+        sync: false # Render попросит ввести это значение при создании.
+
+# Базы данных, согласно документации, объявляются в отдельном списке.
+databases:
+  - name: gigdaemon-db
+    region: frankfurt
+    plan: free
+    postgresMajorVersion: 15
