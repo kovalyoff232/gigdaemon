@@ -15,7 +15,9 @@ php artisan view:cache
 echo "Starting PHP-FPM..."
 php-fpm -D
 
-# 4. Запускаем Nginx на переднем плане.
-# Эта команда будет удерживать контейнер в рабочем состоянии.
-echo "Starting Nginx..."
-nginx -g "daemon off;"
+# 4. === ГЛАВНЫЙ ФИКС ===
+# Мы принудительно указываем Nginx, какой конфигурационный файл использовать.
+# Путь внутри контейнера - /var/www/html/docker/nginx.conf
+# Это заставит его слушать на порту 10000, как и ожидает Render.
+echo "Starting Nginx with correct config..."
+nginx -c /var/www/html/docker/nginx.conf -g "daemon off;"
