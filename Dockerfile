@@ -23,9 +23,10 @@ WORKDIR /var/www/html
 RUN apk add --no-cache bash nginx libzip-dev zip postgresql-dev \
     && docker-php-ext-install pdo pdo_pgsql zip
 
-# === ИЗМЕНЕНИЕ ЗДЕСЬ: КОПИРУЕМ КОНФИГУРАЦИЮ PHP-FPM ===
+# Копируем наши конфигурации
 COPY docker/www.conf /usr/local/etc/php-fpm.d/www.conf
 COPY docker/nginx.conf /etc/nginx/nginx.conf
+COPY docker/fastcgi_params /var/www/html/docker/fastcgi_params
 
 # Копируем Composer
 COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
@@ -40,9 +41,9 @@ COPY --from=frontend /app/public/build/ /var/www/html/public/build/
 # Запускаем скрипты Composer
 RUN composer dump-autoload --optimize
 
-# Создаем директорию для сокета и настраиваем права доступа
-RUN mkdir -p /var/run/php \
-    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/run/php \
+# Настраиваем права доступа
+# Папка /var/run/php больше не нужна
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Копируем и делаем исполняемым наш скрипт запуска
