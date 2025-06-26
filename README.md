@@ -95,10 +95,10 @@ To execute the backend test suite, run the following command:
 php artisan test
 ```
 
-Deployment
-This project is configured for zero-downtime, continuous deployment to Render.com using a render.yaml Blueprint file.
-On every push to the master branch, a new Docker image is built automatically.
-The build process installs all dependencies, compiles frontend assets, and runs Laravel-specific optimizations.
-Database migrations are applied automatically before the new version goes live.
-The application is connected to a PostgreSQL database, also managed by the Blueprint.
-All necessary environment variables (excluding secrets like APP_KEY) are defined as Infrastructure as Code within the render.yaml file.
+## Deployment
+* This project is configured for zero-downtime, continuous deployment to Render.com using a render.yaml Blueprint file.
+* On every push to the master branch, a new Docker image is built automatically.
+* The build process installs all dependencies, compiles frontend assets, and runs Laravel-specific optimizations.
+* Database migrations are applied automatically before the new version goes live.
+* The application is connected to a PostgreSQL database, also managed by the Blueprint.
+* All necessary environment variables (excluding secrets like APP_KEY) are defined as Infrastructure as Code within the render.yaml file.

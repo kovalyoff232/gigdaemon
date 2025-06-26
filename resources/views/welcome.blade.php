@@ -1,66 +1,24 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>GigDaemon</title>
+@extends('layouts.app')
 
-        <!-- Scripts -->
-        {{-- ИСПРАВЛЕНИЕ: Мы указываем правильный путь к нашему SCSS файлу, как и в основном шаблоне --}}
-        @vite(['resources/sass/app.scss', 'resources/js/app.js'])
-    </head>
-    <body class="antialiased">
-        <div id="app">
-            <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
-                <div class="container">
-                    <a class="navbar-brand" href="{{ url('/') }}">
-                        GigDaemon
-                    </a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-
-                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                        <!-- Left Side Of Navbar -->
-                        <ul class="navbar-nav me-auto">
-
-                        </ul>
-
-                        <!-- Right Side Of Navbar -->
-                        <ul class="navbar-nav ms-auto">
-                            <!-- Authentication Links -->
-                            @if (Route::has('login'))
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
-                                </li>
-                            @endif
-
-                            @if (Route::has('register'))
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
-                                </li>
-                            @endif
-                        </ul>
-                    </div>
+@section('content')
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="p-5 mb-4 bg-light rounded-3 text-center">
+                <div class="container-fluid py-5">
+                    <h1 class="display-5 fw-bold">Welcome to GigDaemon</h1>
+                    <p class="fs-4">Your personal assistant for managing freelance projects, clients, and invoices.</p>
+                    <hr class="my-4">
+                    <p>Please log in or register to access your dashboard.</p>
+                    @if (Route::has('login'))
+                        <a class="btn btn-primary btn-lg" href="{{ route('login') }}" role="button">Login</a>
+                    @endif
+                    @if (Route::has('register'))
+                         <a class="btn btn-secondary btn-lg" href="{{ route('register') }}" role="button">Register</a>
+                    @endif
                 </div>
-            </nav>
-
-            <main class="py-4">
-                <div class="container text-center">
-                    <div class="row justify-content-center">
-                        <div class="col-md-8">
-                            <div class="card">
-                                <div class="card-header"><h1>Welcome to GigDaemon</h1></div>
-
-                                <div class="card-body">
-                                    <p>Your personal assistant for managing freelance projects.</p>
-                                    <p>Please <a href="{{ route('login') }}">login</a> or <a href="{{ route('register') }}">register</a> to continue.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
+            </div>
         </div>
-    </body>
-</html>
+    </div>
+</div>
+@endsection
