@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('clients', function (Blueprint $table) {
-            // Добавляем столбец для ставки после телефона.
-            // Он может быть пустым (nullable).
             $table->decimal('default_rate', 10, 2)->nullable()->after('phone');
+            // ВОТ ОНО. ВАЛЮТА КЛИЕНТА.
+            $table->string('default_currency', 3)->default('RUB')->after('default_rate');
         });
     }
 
@@ -25,6 +25,7 @@ return new class extends Migration
     {
         Schema::table('clients', function (Blueprint $table) {
             $table->dropColumn('default_rate');
+            $table->dropColumn('default_currency');
         });
     }
 };
