@@ -1,0 +1,48 @@
+# Это Blueprint. Единый файл для описания всего нашего приложения.
+services:
+  # Наша база данных PostgreSQL
+  - type: psql
+    name: gigdaemon-db
+    region: frankfurt
+    plan: free
+    postgresMajorVersion: 15
+
+  # Наш веб-сервер на Laravel
+  - type: web
+    name: gigdaemon
+    region: frankfurt
+    plan: free
+    # Указываем, что наша среда - это PHP
+    runtime: php
+    buildCommand: |
+      composer install --no-dev --no-interaction --optimize-autoloader
+      php artisan migrate --force
+      php artisan config:cache
+      php artisan route:cache
+      php artisan view:cache
+      npm install
+      npm run build
+    startCommand: "php artisan serve --host 0.0.0.0 --port 10000"
+    # Переменные окружения.
+    # ВАЖНО: APP_KEY - это секрет, его нужно будет добавить вручную в интерфейсе Render.
+    envVars:
+      - key: APP_URL
+        # Render автоматически подставит сюда публичный URL нашего сервиса
+        fromService:
+          type: web
+          name: gigdaemon
+          property: url
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: LOG_CHANNEL
+        value: stderr
+      # Подключаемся к нашей базе данных по ее внутреннему адресу
+      - key: DATABASE_URL
+        fromService:
+          type: psql
+          name: gigdaemon-db
+          property: connectionString
+      - key: APP_KEY # Сюда мы добавим секретный ключ
+        sync: false
