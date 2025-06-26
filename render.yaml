@@ -1,4 +1,3 @@
-# Финальный, работающий Blueprint.
 databases:
   - name: gigdaemon-db
     region: frankfurt
@@ -17,14 +16,12 @@ services:
           name: gigdaemon-db
           property: connectionString
       - key: APP_URL
-        # Это значение Render подставит автоматически после первого успешного деплоя.
-        value: https://gigdaemon.onrender.com 
+        value: https://gigdaemon.onrender.com # Заменишь на свой реальный адрес
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: false
       - key: LOG_CHANNEL
         value: stderr
-      # Секрет, который ты должен был уже добавить вручную в интерфейсе Render
       - key: APP_KEY
         sync: false
