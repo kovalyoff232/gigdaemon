@@ -11,29 +11,41 @@ services:
     runtime: docker
     healthCheckPath: /up
     envVars:
-      # --- Подключение к Базе Данных ---
+      # --- ЯВНОЕ, ТУПОЕ, НАДЕЖНОЕ ПОДКЛЮЧЕНИЕ К БАЗЕ ДАННЫХ ---
       - key: DB_CONNECTION
         value: pgsql
-      - key: DATABASE_URL
+      - key: DB_HOST
         fromDatabase:
           name: gigdaemon-db
-          property: connectionString
-      
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: gigdaemon-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: gigdaemon-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: gigdaemon-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: gigdaemon-db
+          property: password
+
       # --- Настройки Приложения ---
       - key: APP_URL
-        value: https://gigdaemon.onrender.com # Замени на свой реальный URL, когда он появится
+        value: https://gigdaemon.onrender.com # Замени на свой
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: false
       - key: LOG_CHANNEL
         value: stderr
-      - key: APP_KEY
-        sync: false # Render попросит ввести это значение при создании.
 
-      # === КЛЮЧИ К РЕШЕНИЮ ВСЕХ ПРОБЛЕМ ===
-      # Мы явно указываем, как работать с кэшем, очередями и сессиями,
-      # чтобы Laravel не пытался писать в файловую систему.
+      # --- Настройки для работы в продакшене ---
       - key: CACHE_DRIVER
         value: array
       - key: QUEUE_CONNECTION
@@ -42,3 +54,7 @@ services:
         value: cookie
       - key: SESSION_LIFETIME
         value: 120
+      
+      # --- Секрет ---
+      - key: APP_KEY
+        sync: false
