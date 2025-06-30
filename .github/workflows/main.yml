@@ -20,9 +20,9 @@ jobs:
           php-version: '8.2'
           extensions: pdo, pdo_pgsql, zip
           
-
+      - name: Create .env file
         run: php -r "file_exists('.env') || copy('.env.example', '.env');"
-        
+
       - name: Install Composer Dependencies
         run: composer install --no-interaction --no-progress --no-suggest
 
