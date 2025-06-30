@@ -4,15 +4,7 @@ GigDaemon is a full-stack web application designed to serve as a comprehensive p
 
 This application is engineered to handle core business logic, including client and project management, time tracking, and invoice generation, showcasing the ability to build robust, scalable, and professional-grade systems.
 
-### Screenshots
 
-| Dashboard | Invoicing |
-| :---: | :---: |
-| ![Dashboard Screenshot](link_to_dashboard_screenshot.png) | ![Invoices Screenshot](link_to_invoices_screenshot.png) |
-
-| Invoice Detail View | Generated PDF Invoice |
-| :---: | :---: |
-| ![Invoice Detail Screenshot](link_to_invoice_detail_screenshot.png) | ![Invoice PDF Screenshot](link_to_invoice_pdf_screenshot.png) |
 
 ---
 
